@@ -12,16 +12,13 @@
   console.log(dataBuildings);
 
   const x = d3.scaleBand()
-    .domain(["Burj Khalifa", "Shanghai Tower", 
-    "Abraj Al-Bait Clock Tower", "Ping An Finance Centre", 
-    "Lotte World Tower", "One World Trade Center",
-    "Guangzhou CTF Finance Center"])
+    .domain(dataBuildings.map(d => d.name))
     .range([0, 400])
     .paddingInner(0.4)
     .paddingOuter(0.4);
 
   const y = d3.scaleLinear()
-    .domain([0, 828])
+    .domain([0, d3.max(dataBuildings, d => d.height)])
     .range([0, 400]);
 
   const svg = d3.select('#chart-area').append('svg')
