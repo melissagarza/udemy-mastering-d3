@@ -12,8 +12,10 @@
     top: 10,
     bottom: 150
   };
-  const width = 600;
-  const height = 400;
+  const widthSvg = 600;
+  const heightSvg = 400;
+  const widthChart = widthSvg - margin.left - margin.right;
+  const heightChart = heightSvg - margin.top - margin.bottom;
 
   const dataBuildings = await d3.json('data/buildings.json');
 
@@ -21,13 +23,13 @@
 
   const scaleX = d3.scaleBand()
     .domain(dataBuildings.map(d => d.name))
-    .range([0, width - margin.left - margin.right])
+    .range([0, widthChart])
     .paddingInner(0.4)
     .paddingOuter(0.4);
 
   const scaleY = d3.scaleLinear()
     .domain([0, d3.max(dataBuildings, d => d.height)])
-    .range([0, height - margin.top - margin.bottom]);
+    .range([heightChart, 0]);
 
   const axisX = d3.axisBottom(scaleX);
 
@@ -36,15 +38,15 @@
     .tickFormat(d => `${d}m`);
 
   const svg = d3.select('#chart-area').append('svg')
-    .attr('width', width)
-    .attr('height', height);
+    .attr('width', widthSvg)
+    .attr('height', heightSvg);
 
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
   g.append('g')
     .attr('class', 'x axis')
-    .attr('transform', `translate(0, ${height - margin.top - margin.bottom})`)
+    .attr('transform', `translate(0, ${heightChart})`)
     .call(axisX)
     .selectAll('text')
       .attr('x', '-5')
@@ -59,15 +61,15 @@
   g.append('text')
     .text('The World\'s Tallest Buildings')
       .attr('class', 'x axis-label')
-      .attr('x', (width - margin.left - margin.right) / 2)
-      .attr('y', height - 25)
+      .attr('x', (widthChart) / 2)
+      .attr('y', heightSvg - 25)
       .attr('font-size', '20px')
       .attr('text-anchor', 'middle');
 
   g.append('text')
     .text('Height (m)')
       .attr('class', 'y axis-label')
-      .attr('x', -((height - margin.top - margin.bottom) / 2))
+      .attr('x', -((heightChart) / 2))
       .attr('y', -60)
       .attr('transform', 'rotate(-90)')
       .attr('font-size', '20px')
@@ -79,9 +81,9 @@
   rectangles.enter('rect')
     .append('rect')
       .attr('x', d => scaleX(d.name))
-      .attr('y', 0)
+      .attr('y', d => scaleY(d.height))
       .attr('width', scaleX.bandwidth)
-      .attr('height', d => scaleY(d.height))
+      .attr('height', d => heightChart - scaleY(d.height))
       .attr('fill', 'gray');
 
 })();
