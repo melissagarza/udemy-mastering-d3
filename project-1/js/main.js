@@ -9,7 +9,7 @@
   const margin = {
     top: 10,
     right: 10,
-    bottom: 150,
+    bottom: 100,
     left: 100,
   };
   const widthSvg = 800;
@@ -35,12 +35,36 @@
     .domain([0, d3.max(dataRevenues, d => d.revenue)])
     .range([heightChart, 0]);
 
+  const axisX = d3.axisBottom(scaleX);
+
+  const axisY = d3.axisLeft(scaleY);
+
   const svg = d3.select('#chart-area').append('svg')
     .attr('width', widthSvg)
     .attr('height', heightSvg);
 
   const chart = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+  chart.append('g')
+    .attr('transform', `translate(0, ${heightChart})`)
+    .call(axisX);
+
+  chart.append('g')
+    .attr('transform', `translate(0, 0)`)
+    .call(axisY);
+
+  chart.append('text')
+    .text('Month')
+      .attr('transform', `translate(${widthChart / 2}, ${heightChart + 50})`)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '20px');
+
+  chart.append('text')
+    .text('Revenue')
+      .attr('transform', `translate(-60, ${heightChart / 2})rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '20px');
 
   const bars = chart.selectAll('rect')
     .data(dataRevenues);
