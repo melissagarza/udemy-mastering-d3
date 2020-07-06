@@ -21,13 +21,13 @@
 
   const t = d3.transition().duration(750);
 
-  const dataRevenues = await d3.json('data/revenues.json');
+  const data = await d3.json('data/revenues.json');
 
-  dataRevenues.forEach(d => {
+  data.forEach(d => {
     d.revenue = +d.revenue;
     d.profit = +d.profit;
   });
-  console.log(dataRevenues);
+  console.log(data);
 
   const scaleX = d3.scaleBand()
     .range([0, widthChart])
@@ -66,8 +66,8 @@
 
     const value = flag ? 'revenue' : 'profit';
 
-    scaleX.domain(dataRevenues.map(d => d.month));
-    scaleY.domain([0, d3.max(dataRevenues, d => d[value])]);
+    scaleX.domain(data.map(d => d.month));
+    scaleY.domain([0, d3.max(data, d => d[value])]);
 
     const axisX = d3.axisBottom(scaleX);
     const axisY = d3.axisLeft(scaleY);
@@ -77,7 +77,7 @@
 
     // JOIN new data with old elements
     const bars = chart.selectAll('rect')
-      .data(dataRevenues);
+      .data(data, d => d.month);
 
     // EXIT old elements not present in new data
     bars.exit()
@@ -86,10 +86,6 @@
         .attr('y', scaleY(0))
         .attr('height', 0)
         .remove();
-
-    // UPDATE old elements present in new data
-    bars.transition(t)
-      ;
 
     // ENTER new elements present in new data
     bars.enter()
@@ -112,10 +108,13 @@
   };
 
   d3.interval(() => {
-    update(dataRevenues);
+    let newData = flag ? data : data.slice(1);
+
+    update(newData);
+
     flag = !flag;
   }, 1000);
 
-  update(dataRevenues);
+  update(data);
 
 })();
