@@ -89,10 +89,7 @@
 
     // UPDATE old elements present in new data
     bars.transition(t)
-      .attr('x', d => scaleX(d.month))
-      .attr('y', d => scaleY(d[value]))
-      .attr('width', scaleX.bandwidth)
-      .attr('height', d => heightChart - scaleY(d[value]));
+      ;
 
     // ENTER new elements present in new data
     bars.enter()
@@ -102,8 +99,12 @@
         .attr('width', scaleX.bandwidth)
         .attr('height', 0)
         .attr('fill', '#999999')
+      // AND UPDATE old elements present in new data
+      .merge(bars)
       .transition(t)
+        .attr('x', d => scaleX(d.month))
         .attr('y', d => scaleY(d[value]))
+        .attr('width', scaleX.bandwidth)
         .attr('height', d => heightChart - scaleY(d[value]));
 
     const label = flag ? 'Revenue' : 'Profit';
