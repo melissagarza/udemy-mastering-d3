@@ -69,16 +69,28 @@
     axisGroupX.call(axisX);
     axisGroupY.call(axisY);
 
-    // const bars = chart.selectAll('rect')
-    //   .data(dataRevenues);
+    // JOIN new data with old elements
+    const bars = chart.selectAll('rect')
+      .data(dataRevenues);
 
-    // bars.enter()
-    //   .append('rect')
-    //     .attr('x', d => scaleX(d.month))
-    //     .attr('y', d => scaleY(d.revenue))
-    //     .attr('width', scaleX.bandwidth)
-    //     .attr('height', d => heightChart - scaleY(d.revenue))
-    //     .attr('fill', '#999999');
+    // EXIT old elements not present in new data
+    bars.exit().remove();
+
+    // UPDATE old elements present in new data
+    bars
+      .attr('x', d => scaleX(d.month))
+      .attr('y', d => scaleY(d.revenue))
+      .attr('width', scaleX.bandwidth)
+      .attr('height', d => heightChart - scaleY(d.revenue));
+
+    // ENTER new elements present in new data
+    bars.enter()
+      .append('rect')
+        .attr('x', d => scaleX(d.month))
+        .attr('y', d => scaleY(d.revenue))
+        .attr('width', scaleX.bandwidth)
+        .attr('height', d => heightChart - scaleY(d.revenue))
+        .attr('fill', '#999999');
   };
 
   d3.interval(() => {
