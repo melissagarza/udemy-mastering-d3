@@ -17,6 +17,8 @@
   const widthChart = widthSvg - margin.left - margin.right;
   const heightChart = heightSvg - margin.top - margin.bottom;
 
+  let flag = true;
+
   const dataRevenues = await d3.json('data/revenues.json');
 
   dataRevenues.forEach(d => {
@@ -46,13 +48,13 @@
   const axisGroupY = chart.append('g')
     .attr('transform', `translate(0, 0)`);
 
-  chart.append('text')
+  const labelX = chart.append('text')
     .text('Month')
       .attr('transform', `translate(${widthChart / 2}, ${heightChart + 50})`)
       .attr('text-anchor', 'middle')
       .attr('font-size', '20px');
 
-  chart.append('text')
+  const labelY = chart.append('text')
     .text('Revenue')
       .attr('transform', `translate(-60, ${heightChart / 2})rotate(-90)`)
       .attr('text-anchor', 'middle')
@@ -60,8 +62,10 @@
 
   const update = (data) => {
 
+    const value = flag ? 'revenue' : 'profit';
+
     scaleX.domain(dataRevenues.map(d => d.month));
-    scaleY.domain([0, d3.max(dataRevenues, d => d.revenue)]);
+    scaleY.domain([0, d3.max(dataRevenues, d => d[value])]);
 
     const axisX = d3.axisBottom(scaleX);
     const axisY = d3.axisLeft(scaleY);
@@ -79,22 +83,26 @@
     // UPDATE old elements present in new data
     bars
       .attr('x', d => scaleX(d.month))
-      .attr('y', d => scaleY(d.revenue))
+      .attr('y', d => scaleY(d[value]))
       .attr('width', scaleX.bandwidth)
-      .attr('height', d => heightChart - scaleY(d.revenue));
+      .attr('height', d => heightChart - scaleY(d[value]));
 
     // ENTER new elements present in new data
     bars.enter()
       .append('rect')
         .attr('x', d => scaleX(d.month))
-        .attr('y', d => scaleY(d.revenue))
+        .attr('y', d => scaleY(d[value]))
         .attr('width', scaleX.bandwidth)
-        .attr('height', d => heightChart - scaleY(d.revenue))
+        .attr('height', d => heightChart - scaleY(d[value]))
         .attr('fill', '#999999');
+
+    const label = flag ? 'Revenue' : 'Profit';
+    labelY.text(label);
   };
 
   d3.interval(() => {
     update(dataRevenues);
+    flag = !flag;
   }, 1000);
 
   update(dataRevenues);
