@@ -19,6 +19,8 @@
 
   let flag = true;
 
+  const t = d3.transition().duration(750);
+
   const dataRevenues = await d3.json('data/revenues.json');
 
   dataRevenues.forEach(d => {
@@ -70,18 +72,23 @@
     const axisX = d3.axisBottom(scaleX);
     const axisY = d3.axisLeft(scaleY);
     
-    axisGroupX.call(axisX);
-    axisGroupY.call(axisY);
+    axisGroupX.transition(t).call(axisX);
+    axisGroupY.transition(t).call(axisY);
 
     // JOIN new data with old elements
     const bars = chart.selectAll('rect')
       .data(dataRevenues);
 
     // EXIT old elements not present in new data
-    bars.exit().remove();
+    bars.exit()
+      .attr('fill', 'red')
+      .transition(t)
+        .attr('y', scaleY(0))
+        .attr('height', 0)
+        .remove();
 
     // UPDATE old elements present in new data
-    bars
+    bars.transition(t)
       .attr('x', d => scaleX(d.month))
       .attr('y', d => scaleY(d[value]))
       .attr('width', scaleX.bandwidth)
@@ -91,10 +98,13 @@
     bars.enter()
       .append('rect')
         .attr('x', d => scaleX(d.month))
-        .attr('y', d => scaleY(d[value]))
+        .attr('y', scaleY(0))
         .attr('width', scaleX.bandwidth)
-        .attr('height', d => heightChart - scaleY(d[value]))
-        .attr('fill', '#999999');
+        .attr('height', 0)
+        .attr('fill', '#999999')
+      .transition(t)
+        .attr('y', d => scaleY(d[value]))
+        .attr('height', d => heightChart - scaleY(d[value]));
 
     const label = flag ? 'Revenue' : 'Profit';
     labelY.text(label);
