@@ -76,7 +76,7 @@
     axisGroupY.transition(t).call(axisY);
 
     // JOIN new data with old elements
-    const bars = chart.selectAll('rect')
+    const bars = chart.selectAll('circle')
       .data(data, d => d.month);
 
     // EXIT old elements not present in new data
@@ -89,19 +89,17 @@
 
     // ENTER new elements present in new data
     bars.enter()
-      .append('rect')
-        .attr('x', d => scaleX(d.month))
-        .attr('y', scaleY(0))
-        .attr('width', scaleX.bandwidth)
-        .attr('height', 0)
+      .append('circle')
+        .attr('cx', d => scaleX(d.month) + (scaleX.bandwidth() / 2))
+        .attr('cy', scaleY(0))
+        .attr('r', 5)
         .attr('fill', '#999999')
       // AND UPDATE old elements present in new data
       .merge(bars)
       .transition(t)
-        .attr('x', d => scaleX(d.month))
-        .attr('y', d => scaleY(d[value]))
-        .attr('width', scaleX.bandwidth)
-        .attr('height', d => heightChart - scaleY(d[value]));
+        .attr('cx', d => scaleX(d.month) + (scaleX.bandwidth() / 2))
+        .attr('cy', d => scaleY(d[value]))
+        .attr('r', 5);
 
     const label = flag ? 'Revenue' : 'Profit';
     labelY.text(label);
