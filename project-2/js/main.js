@@ -4,6 +4,7 @@
 *    Project 2 - Gapminder Clone
 */
 
-d3.json("data/data.json").then(function(data){
-	console.log(data);
-})
+(async () => {
+  const data = await d3.json('data/data.json');
+  console.log(data);
+})();
