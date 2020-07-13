@@ -16,7 +16,13 @@
   };
   const widthChart = widthSvg - margin.left - margin.right;
   const heightChart = heightSvg - margin.top - margin.bottom;
-  const tr = d3.transition().duration(500);
+  const colors = {
+    'africa': 'yellow',
+    'americas': 'green',
+    'asia': 'red',
+    'europe': 'blue'
+  };
+  const tr = d3.transition().duration(300);
 
   let index = 0;
 
@@ -26,10 +32,8 @@
     d.year = +d.year;
   });
 
-  console.log(data);
-
   const scaleX = d3.scaleLog()
-    .domain([300, 150000])
+    .domain([125, 150000])
     .range([0, widthChart]);
 
   const scaleY = d3.scaleLinear()
@@ -40,7 +44,12 @@
     .range([5, 25]);
 
   const scaleColor = d3.scaleOrdinal()
-    .range(d3.schemePaired);
+    .range([
+      'yellow',
+      'green',
+      'red',
+      'blue'
+    ]);
 
   const axisX = d3.axisBottom(scaleX)
     .tickValues([400, 4000, 40000])
@@ -66,20 +75,40 @@
     .transition(tr)
     .call(axisY);
 
-  const update = (data) => {
-    const countriesByYear = data[index].countries.filter(c => c.life_exp !== null && c.income !== null);
+  const labelX = chart.append('text')
+    .text('GDP Per Capita ($)')
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(${widthChart / 2}, ${heightChart + (margin.bottom / 2)})`);
 
-    console.log(countriesByYear);
+  const labelY = chart.append('text')
+    .text('Life Expectancy (Years)')
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(-${margin.left / 2}, ${heightChart / 2})rotate(-90)`);
+
+  const labelYear = chart.append('text')
+    .text('')
+      .attr('font-size', '150px')
+      .attr('fill', 'gray')
+      .attr('fill-opacity', 0.25)
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(${widthChart / 2}, ${heightChart / 2})`);
+
+  const update = (data) => {
+    const countries = data[index].countries.filter(c => c.life_exp !== null && c.income !== null);
+    
+    labelYear.text(data[index].year);
 
     scaleR.domain([
-      d3.min(countriesByYear, c => c.population),
-      d3.max(countriesByYear, c => c.population)
+      d3.min(countries, c => Math.sqrt(c.population / Math.PI)),
+      d3.max(countries, c => Math.sqrt(c.population / Math.PI))
     ]);
 
-    scaleColor.domain(countriesByYear.filter(c => c.country));
+    const continents = _.map(_.unique(countries, c => c.continent), c => c.continent);
+
+    scaleColor.domain(continents.sort());
 
     const points = chart.selectAll('circle')
-      .data(countriesByYear, d => d.country);
+      .data(countries, d => d.country);
 
     points.exit().remove();
 
@@ -87,17 +116,23 @@
       .append('circle')
         .attr('cx', d => scaleX(d.income))
         .attr('cy', d => scaleY(d.life_exp))
-        .attr('r', d => scaleR(d.population))
-        .attr('fill', d => scaleColor(d.country));
+        .attr('r', d => scaleR(Math.sqrt(d.population / Math.PI)))
+        .attr('fill', d => scaleColor(d.continent))
+      .merge(points)
+      .transition(tr)
+        .attr('cx', d => scaleX(d.income))
+        .attr('cy', d => scaleY(d.life_exp))
+        .attr('r', d => scaleR(Math.sqrt(d.population / Math.PI)));
   };
 
   d3.interval(() => {
 
-    // update(data);
+    update(data);
 
-    // index++;
-    // if (index === 214) index = 0;
-  }, 1000);
+    index++;
+    if (index === 215) index = 0;
+  
+  }, 300);
 
   update(data);
 
