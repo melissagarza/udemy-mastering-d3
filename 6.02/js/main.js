@@ -27,6 +27,7 @@
   let index = 0;
 
   const data = await d3.json('data/data.json');
+  const continents = _.map(_.unique(data[0].countries, c => c.continent), c => c.continent).sort();
 
   data.forEach(d => {
     d.year = +d.year;
@@ -44,6 +45,7 @@
     .range([5, 25]);
 
   const scaleColor = d3.scaleOrdinal()
+    .domain(continents)
     .range([
       'yellow',
       'green',
@@ -65,6 +67,26 @@
 
   const chart = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+  const legend = chart.append('g')
+    .attr('transform', `translate(${widthChart - 10}, ${heightChart - 125})`);
+
+  continents.forEach((continent, i) => {
+    let legendRow = legend.append('g')
+      .attr('transform', `translate(0, ${i * 20})`);
+
+    legendRow.append('rect')
+      .attr('width', 10)
+      .attr('height', 10)
+      .attr('fill', scaleColor(continent));
+
+    legendRow.append('text')
+      .attr('x', -10)
+      .attr('y', 10)
+      .attr('text-anchor', 'end')
+      .style('text-transform', 'capitalize')
+      .text(continent);
+  });
 
   const groupAxisX = chart.append('g')
     .attr('transform', `translate(0, ${heightChart})`)
@@ -102,10 +124,6 @@
       d3.min(countries, c => Math.sqrt(c.population / Math.PI)),
       d3.max(countries, c => Math.sqrt(c.population / Math.PI))
     ]);
-
-    const continents = _.map(_.unique(countries, c => c.continent), c => c.continent);
-
-    scaleColor.domain(continents.sort());
 
     const points = chart.selectAll('circle')
       .data(countries, d => d.country);
