@@ -25,6 +25,7 @@
   const tr = d3.transition().duration(300);
 
   let index = 0;
+  let interval;
 
   const data = await d3.json('data/data.json');
   const continents = _.map(_.unique(data[0].countries, c => c.continent), c => c.continent).sort();
@@ -158,14 +159,22 @@
         .attr('r', d => scaleR(Math.sqrt(d.population / Math.PI)));
   };
 
-  d3.interval(() => {
+  $('#play-button')
+    .on('click', (e) => {
+      let button = $(e.target);
+      if (button.text() === 'Play') {
+        button.text('Pause');
+        interval = setInterval(step, 300);
+      } else {
+        button.text('Play');
+        clearInterval(interval);
+      }
+    });
 
-    update(data);
-
-    index++;
-    if (index === 215) index = 0;
-  
-  }, 300);
+  const step = () => {
+    index = (index < 214) ? index + 1 : 0;
+    update(data)
+  };
 
   update(data);
 
