@@ -68,6 +68,19 @@
   const chart = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+  const tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .html(d => {
+      let text = `<strong>Country:</strong> <span style="color:red">${d.country}</span><br>`;
+      text += `<strong>Continent:</strong> <span style="color:red;text-transform:capitalize">${d.continent}</span><br>`;
+      text += `<strong>Life Expectancy:</strong> <span style="color:red">${d3.format('.2f')(d.life_exp)}</span><br>`;
+      text += `<strong>GDP Per Capita:</strong> <span style="color:red">${d3.format('$,.0f')(d.income)}</span><br>`;
+      text += `<strong>Population:</strong> <span style="color:red">${d3.format(',.0f')(d.population)}</span><br>`;
+      return text;
+    });
+
+  chart.call(tip);
+
   const legend = chart.append('g')
     .attr('transform', `translate(${widthChart - 10}, ${heightChart - 125})`);
 
@@ -136,6 +149,8 @@
         .attr('cy', d => scaleY(d.life_exp))
         .attr('r', d => scaleR(Math.sqrt(d.population / Math.PI)))
         .attr('fill', d => scaleColor(d.continent))
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide)
       .merge(points)
       .transition(tr)
         .attr('cx', d => scaleX(d.income))
