@@ -130,7 +130,8 @@
       .attr('transform', `translate(${widthChart / 2}, ${heightChart / 2})`);
 
   const update = (data) => {
-    const countries = data[index].countries.filter(c => c.life_exp !== null && c.income !== null);
+    const selectedContinent = $('#continent-select').val();
+    let countries = data[index].countries.filter(country => country.life_exp !== null && country.income !== null);
     
     labelYear.text(data[index].year);
 
@@ -138,6 +139,8 @@
       d3.min(countries, c => Math.sqrt(c.population / Math.PI)),
       d3.max(countries, c => Math.sqrt(c.population / Math.PI))
     ]);
+
+    countries = countries.filter(country => selectedContinent === 'all' || selectedContinent === country.continent);
 
     const points = chart.selectAll('circle')
       .data(countries, d => d.country);
@@ -169,6 +172,17 @@
         button.text('Play');
         clearInterval(interval);
       }
+    });
+
+  $('#reset-button')
+    .on('click', (e) => {
+      index = 0;
+      update(data);
+    });
+
+  $('#continent-select')
+    .on('change', () => {
+      update(data);
     });
 
   const step = () => {
