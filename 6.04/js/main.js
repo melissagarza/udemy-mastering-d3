@@ -134,6 +134,8 @@
     let countries = data[index].countries.filter(country => country.life_exp !== null && country.income !== null);
     
     labelYear.text(data[index].year);
+    $('#year')[0].innerHTML = data[index].year;
+    $('#date-slider').slider('value', data[index].year);
 
     scaleR.domain([
       d3.min(countries, c => Math.sqrt(c.population / Math.PI)),
@@ -184,6 +186,16 @@
     .on('change', () => {
       update(data);
     });
+
+  $('#date-slider').slider({
+    min: 1800,
+    max: 2014,
+    step: 1,
+    slide: (event, ui) => {
+      index = ui.value - 1800;
+      update(data);
+    }
+  });
 
   const step = () => {
     index = (index < 214) ? index + 1 : 0;
